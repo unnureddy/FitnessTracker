@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input, select, textarea, button {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: transform 0.2s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .exercises-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .exercise-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .exercise-card:hover {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+        
+        .exercise-card.selected {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+        
+        .exercise-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .exercise-category {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .exercise-muscles {
+            color: #999;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        
+        .result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-style: italic;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #c62828;
+        }
+        
+        .workout-summary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .stat {
+            display: inline-block;
+            margin: 0 15px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏋️ Fitness Tracker</h1>
+            <p>Track your workouts with TypeScript power!</p>
+        </div>
+        
+        <div class="grid">
+            <!-- Create Workout Section -->
+            <div class="card">
+                <h2>📝 Create New Workout</h2>
+                <div class="form-group">
+                    <label for="workoutName">Workout Name:</label>
+                    <input type="text" id="workoutName" placeholder="e.g., Push Day, Leg Day">
+                </div>
+                <div class="form-group">
+                    <label for="userId">User ID:</label>
+                    <input type="text" id="userId" value="user123" placeholder="Your user ID">
+                </div>
+                <div class="form-group">
+                    <label for="workoutNotes">Notes (optional):</label>
+                    <textarea id="workoutNotes" rows="3" placeholder="Any notes about this workout..."></textarea>
+                </div>
+                <button onclick="createWorkout()">Create Workout</button>
+                <div id="workoutResult"></div>
+            </div>
+            
+            <!-- Exercises Section -->
+            <div class="card">
+                <h2>💪 Available Exercises</h2>
+                <button onclick="loadExercises()">Load Exercises</button>
+                <div id="exercisesList"></div>
+            </div>
+        </div>
+        
+        <!-- Current Workout Section -->
+        <div class="card" id="currentWorkoutCard" style="display: none;">
+            <h2>🏃‍♂️ Current Workout</h2>
+            <div id="currentWorkout"></div>
+            
+            <div style="margin-top: 20px;">
+                <h3>Add Exercise to Workout</h3>
+                <div class="form-group">
+                    <label for="selectedExercise">Select Exercise:</label>
+                    <select id="selectedExercise">
+                        <option value="">Choose an exercise...</option>
+                    </select>
+                </div>
+                <button onclick="addExerciseToWorkout()">Add Exercise</button>
+            </div>
+            
+            <div style="margin-top: 20px;" id="addSetSection" style="display: none;">
+                <h3>Add Set</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label for="setReps">Reps:</label>
+                        <input type="number" id="setReps" min="1" placeholder="12">
+                    </div>
+                    <div class="form-group">
+                        <label for="setWeight">Weight (kg):</label>
+                        <input type="number" id="setWeight" min="0" step="0.5" placeholder="50">
+                    </div>
+                    <div class="form-group">
+                        <label for="setRPE">RPE (1-10):</label>
+                        <input type="number" id="setRPE" min="1" max="10" placeholder="7">
+                    </div>
+                </div>
+                <button onclick="addSet()">Add Set</button>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <button onclick="completeWorkout()" style="background: #4CAF50;">Complete Workout</button>
+            </div>
+        </div>
+        
+        <!-- Analytics Section -->
+        <div class="card">
+            <h2>📊 Your Analytics</h2>
+            <button onclick="loadAnalytics()">Load Analytics</button>
+            <div id="analyticsResult"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+        let currentWorkoutId = null;
+        let currentExerciseIndex = -1;
+        let allExercises = [];
+
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API call failed:', error);
+                throw error;
+            }
+        }
+
+        async function createWorkout() {
+            const name = document.getElementById('workoutName').value;
+            const userId = document.getElementById('userId').value;
+            const notes = document.getElementById('workoutNotes').value;
+            
+            if (!name || !userId) {
+                alert('Please fill in workout name and user ID');
+                return;
+            }
+            
+            try {
+                document.getElementById('workoutResult').innerHTML = '<div class="loading">Creating workout...</div>';
+                
+                const workout = await apiCall('/workouts', 'POST', { name, userId, notes });
+                
+                currentWorkoutId = workout.id;
+                
+                document.getElementById('workoutResult').innerHTML = `
+                    <div class="result">
+                        <h3>✅ Workout Created!</h3>
+                        <p><strong>ID:</strong> ${workout.id}</p>
+                        <p><strong>Name:</strong> ${workout.name}</p>
+                        <p><strong>Created:</strong> ${new Date(workout.createdAt).toLocaleString()}</p>
+                    </div>
+                `;
+                
+                // Start the workout
+                await apiCall(`/workouts/${workout.id}/start`, 'PUT');
+                
+                // Show current workout section
+                document.getElementById('currentWorkoutCard').style.display = 'block';
+                updateCurrentWorkoutDisplay();
+                
+                // Load exercises for selection
+                if (allExercises.length === 0) {
+                    await loadExercises();
+                }
+                populateExerciseDropdown();
+                
+            } catch (error) {
+                document.getElementById('workoutResult').innerHTML = `
+                    <div class="error">Failed to create workout: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function loadExercises() {
+            try {
+                document.getElementById('exercisesList').innerHTML = '<div class="loading">Loading exercises...</div>';
+                
+                allExercises = await apiCall('/exercises');
+                
+                const exercisesHtml = `
+                    <div class="exercises-grid">
+                        ${allExercises.map(exercise => `
+                            <div class="exercise-card">
+                                <div class="exercise-name">${exercise.name}</div>
+                                <div class="exercise-category">${exercise.category}</div>
+                                <div class="exercise-muscles">${exercise.muscleGroups.join(', ')}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                document.getElementById('exercisesList').innerHTML = exercisesHtml;
+                
+            } catch (error) {
+                document.getElementById('exercisesList').innerHTML = `
+                    <div class="error">Failed to load exercises: ${error.message}</div>
+                `;
+            }
+        }
+
+        function populateExerciseDropdown() {
+            const select = document.getElementById('selectedExercise');
+            select.innerHTML = '<option value="">Choose an exercise...</option>';
+            
+            allExercises.forEach(exercise => {
+                const option = document.createElement('option');
+                option.value = exercise.id;
+                option.textContent = `${exercise.name} (${exercise.category})`;
+                select.appendChild(option);
+            });
+        }
+
+        async function addExerciseToWorkout() {
+            const exerciseId = document.getElementById('selectedExercise').value;
+            
+            if (!exerciseId || !currentWorkoutId) {
+                alert('Please select an exercise');
+                return;
+            }
+            
+            try {
+                const workout = await apiCall(`/workouts/${currentWorkoutId}/exercises`, 'POST', {
+                    exerciseId: exerciseId,
+                    notes: ''
+                });
+                
+                currentExerciseIndex = workout.exercises.length - 1;
+                updateCurrentWorkoutDisplay();
+                
+                // Show add set section
+                document.getElementById('addSetSection').style.display = 'block';
+                
+            } catch (error) {
+                alert(`Failed to add exercise: ${error.message}`);
+            }
+        }
+
+        async function addSet() {
+            const reps = parseInt(document.getElementById('setReps').value);
+            const weight = parseFloat(document.getElementById('setWeight').value);
+            const rpe = parseInt(document.getElementById('setRPE').value);
+            
+            if (!reps || weight === '' || !currentWorkoutId || currentExerciseIndex === -1) {
+                alert('Please fill in reps and weight');
+                return;
+            }
+            
+            try {
+                await apiCall(`/workouts/${currentWorkoutId}/exercises/${currentExerciseIndex}/sets`, 'POST', {
+                    reps,
+                    weight,
+                    rpe
+                });
+                
+                // Clear form
+                document.getElementById('setReps').value = '';
+                document.getElementById('setWeight').value = '';
+                document.getElementById('setRPE').value = '';
+                
+                updateCurrentWorkoutDisplay();
+                
+            } catch (error) {
+                alert(`Failed to add set: ${error.message}`);
+            }
+        }
+
+        async function updateCurrentWorkoutDisplay() {
+            if (!currentWorkoutId) return;
+            
+            try {
+                const workout = await apiCall(`/workouts/${currentWorkoutId}`);
+                
+                const html = `
+                    <div class="workout-summary">
+                        <h3>${workout.name}</h3>
+                        <div class="stat">
+                            <div class="stat-value">${workout.totalSets}</div>
+                            <div class="stat-label">Sets</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${workout.totalReps}</div>
+                            <div class="stat-label">Reps</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${workout.totalVolume}kg</div>
+                            <div class="stat-label">Volume</div>
+                        </div>
+                    </div>
+                    
+                    ${workout.exercises.map((ex, index) => `
+                        <div style="margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 10px;">
+                            <h4>${ex.exercise.name} (${ex.exercise.category})</h4>
+                            ${ex.sets.map((set, setIndex) => `
+                                <div>Set ${setIndex + 1}: ${set.reps} reps @ ${set.weight > 0 ? set.weight + 'kg' : 'bodyweight'}${set.rpe ? ' (RPE: ' + set.rpe + ')' : ''}</div>
+                            `).join('')}
+                        </div>
+                    `).join('')}
+                `;
+                
+                document.getElementById('currentWorkout').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Failed to update workout display:', error);
+            }
+        }
+
+        async function completeWorkout() {
+            if (!currentWorkoutId) return;
+            
+            try {
+                await apiCall(`/workouts/${currentWorkoutId}/complete`, 'PUT');
+                alert('🎉 Workout completed successfully!');
+                
+                // Reset
+                currentWorkoutId = null;
+                currentExerciseIndex = -1;
+                document.getElementById('currentWorkoutCard').style.display = 'none';
+                document.getElementById('addSetSection').style.display = 'none';
+                
+                // Clear form
+                document.getElementById('workoutName').value = '';
+                document.getElementById('workoutNotes').value = '';
+                
+            } catch (error) {
+                alert(`Failed to complete workout: ${error.message}`);
+            }
+        }
+
+        async function loadAnalytics() {
+            const userId = document.getElementById('userId').value || 'user123';
+            
+            try {
+                document.getElementById('analyticsResult').innerHTML = '<div class="loading">Loading analytics...</div>';
+                
+                const analytics = await apiCall(`/users/${userId}/analytics`);
+                
+                const html = `
+                    <div class="workout-summary">
+                        <h3>📈 Your Progress (Last 30 days)</h3>
+                        <div class="stat">
+                            <div class="stat-value">${analytics.totalWorkouts}</div>
+                            <div class="stat-label">Workouts</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${analytics.totalVolume}kg</div>
+                            <div class="stat-label">Total Volume</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${analytics.workoutsPerWeek.toFixed(1)}</div>
+                            <div class="stat-label">Workouts/Week</div>
+                        </div>
+                    </div>
+                    
+                    ${analytics.mostFrequentExercises.length > 0 ? `
+                        <div style="margin-top: 15px;">
+                            <h4>🏆 Most Frequent Exercises:</h4>
+                            ${analytics.mostFrequentExercises.map(ex => `
+                                <div>${ex.name}: ${ex.count} times</div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                `;
+                
+                document.getElementById('analyticsResult').innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('analyticsResult').innerHTML = `
+                    <div class="error">Failed to load analytics: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Test API connection on page load
+        window.onload = async function() {
+            try {
+                await fetch(`${API_BASE}/health`);
+                console.log('✅ API connection successful');
+            } catch (error) {
+                document.querySelector('.header').innerHTML += `
+                    <div class="error" style="margin-top: 20px;">
+                        ⚠️ API Server not running. Please start the server with: <code>npm run dev:server</code>
+                    </div>
+                `;
+            }
+        };
+    </script>
+</body>
+</html>
